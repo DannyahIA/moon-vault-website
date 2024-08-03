@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import AuthContext from '../auth/AuthContext';
 import './Login.css';
 
 const Login: React.FC = () => {
+    const { login } = useContext(AuthContext);
     const [rightPanelActive, setRightPanelActive] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [error, setError] = useState<string>('');
+    const location = useLocation();
+    const navigate = useNavigate();
+    const from = (location.state as { from?: string })?.from || '/';
 
     const handleSignUpClick = () => {
         setRightPanelActive(true);
@@ -21,7 +27,7 @@ const Login: React.FC = () => {
         setError('');
 
         try {
-            const response = await fetch('/login', {
+            const response = await fetch('http://192.168.100.2:8080/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -36,7 +42,8 @@ const Login: React.FC = () => {
             const data = await response.json();
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('refresh_token', data.refresh_token);
-            // Redirecionar o usuário ou fazer outra ação
+            login();
+            navigate(from, { replace: true });
         } catch (error: unknown) {
             if (error instanceof Error) {
                 setError(error.message);
@@ -51,7 +58,7 @@ const Login: React.FC = () => {
         setError('');
 
         try {
-            const response = await fetch('/register', { // Ajuste o endpoint conforme necessário
+            const response = await fetch('/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -66,7 +73,8 @@ const Login: React.FC = () => {
             const data = await response.json();
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('refresh_token', data.refresh_token);
-            // Redirecionar o usuário ou fazer outra ação
+            login();
+            navigate(from, { replace: true });
         } catch (error: unknown) {
             if (error instanceof Error) {
                 setError(error.message);

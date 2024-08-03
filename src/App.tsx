@@ -5,26 +5,33 @@ import './App.css';
 import Login from './pages/login/Login';
 import MainPage from './pages/main_page/MainPage';
 import Header from './pages/header/Header';
-import RemoteDrive from './pages/login/remote-drive/RemoteDrive';
+import RemoteDrive from './pages/remote-drive/RemoteDrive';
+import About from './pages/about/About';
+import Contact from './pages/contact/Contact';
+import { AuthProvider } from './pages/auth/AuthContext';
 
 function App() {
-  return (
-    <Router>
-    <div className="app">
-        <div className="content-wrapper">
-            <Header />
-            <div className="main-content">
-                <Routes>
-                    <Route path="/" element={<MainPage />} />
-                    <Route path="/home" element={<MainPage />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/remote-drive" element={<RemoteDrive />} />
-                </Routes>
-            </div>
-        </div>
-    </div>
-</Router>
-  );
+    return (
+        <AuthProvider>
+            <Router>
+                <div className="app">
+                    <div className="content-wrapper">
+                        <Header />
+                        <div className="main-content">
+                            <Routes>
+                                <Route path="/" element={<MainPage />} />
+                                <Route path="/home" element={<MainPage />} />
+                                <Route path="/login" element={<Login />} />
+                                <Route path="/remote-drive" element={<RemoteDrive />} />
+                                <Route path="/about" element={<About />} />
+                                <Route path="/contact" element={<Contact />} />
+                            </Routes>
+                        </div>
+                    </div>
+                </div>
+            </Router>
+        </AuthProvider>
+    );
 }
 
 export default App;

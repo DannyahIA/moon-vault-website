@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { FaDownload, FaEdit, FaTrash } from 'react-icons/fa';
+import Modal from 'react-modal';
 import './RemoteDrive.css';
 
 interface Folder {
@@ -17,6 +19,10 @@ const RemoteDrive: React.FC = () => {
     const [files, setFiles] = useState<Folder[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [contextMenu, setContextMenu] = useState<{ x: number, y: number, file: Folder | null, location: 'sidebar' | 'main' } | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalContent, setModalContent] = useState<string | ArrayBuffer | null>(null);
+    const [modalFilePath, setModalFilePath] = useState('');
+    const [previousFolder, setPreviousFolder] = useState<Folder | null>(null); // Added state for previous folder
 
     useEffect(() => {
         fetchFolders().then((data) => setFolders(data));
@@ -135,16 +141,13 @@ const RemoteDrive: React.FC = () => {
 
             // Create a URL for the file
             const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-
-            // Create an invisible link to trigger the download
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filePath.split('/').pop() || 'file';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setModalContent(reader.result);
+                setModalFilePath(filePath);
+                setIsModalOpen(true);
+            };
+            reader.readAsDataURL(blob);
         } catch (error) {
             console.error('Error downloading file:', error);
         }
@@ -152,10 +155,11 @@ const RemoteDrive: React.FC = () => {
 
     const handleFolderClick = async (folder: Folder) => {
         setSelectedFolder(folder);
+        setPreviousFolder(selectedFolder); // Store the previous folder
         const files = await fetchFiles(folder.path);
         setFiles(files);
     };
-    
+
     const handleItemDoubleClick = async (item: Folder) => {
         if (item.is_folder) {
             handleFolderClick(item);
@@ -233,6 +237,12 @@ const RemoteDrive: React.FC = () => {
         }
     };
 
+    const handleBack = () => {
+        if (previousFolder) {
+            handleFolderClick(previousFolder);
+        }
+    };
+
     return (
         <div className="remote-drive-wrapper">
             <div className="header">
@@ -277,7 +287,12 @@ const RemoteDrive: React.FC = () => {
                 <div className="main" onContextMenu={(e) => handleContextMenu(e, null, 'main')}>
                     {selectedFolder && (
                         <div>
-                            <h2>{selectedFolder.name}</h2>
+                            <h2>
+                                {previousFolder && (
+                                    <button onClick={handleBack} className="back-button">Back</button>
+                                )}
+                                {selectedFolder.name}
+                            </h2>
                             {!searchQuery && (
                                 <div className="upload-btn-wrapper">
                                     <label className="upload-btn">
@@ -293,12 +308,19 @@ const RemoteDrive: React.FC = () => {
                                     </label>
                                 </div>
                             )}
-                            <ul>
+                            <ul className="file-list">
                                 {files.map((file) => (
-                                    <li key={file.path}>
-                                        {getFileIcon(file.is_folder, file.extension)} {file.name}
-                                        <span>{file.is_folder ? '' : `${file.size}`}</span>
-                                        <span>{file.data_modified}</span>
+                                    <li key={file.path} onDoubleClick={() => handleItemDoubleClick(file)} className="file-item">
+                                        <div className="file-info">
+                                            <span className="file-icon">{getFileIcon(file.is_folder, file.extension)} {file.name}</span>
+                                            <span className="file-size">{file.is_folder ? '' : `${file.size}`}</span>
+                                            <span className="file-date">{file.data_modified}</span>
+                                        </div>
+                                        <div className="file-actions">
+                                            <FaDownload onClick={() => downloadFile(file.path)} title="Download" />
+                                            <FaEdit onClick={() => handleRename(prompt('New name') || '')} title="Edit" />
+                                            <FaTrash onClick={() => deleteFile(file.path)} title="Delete" />
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
@@ -317,6 +339,34 @@ const RemoteDrive: React.FC = () => {
                     </div>
                 )}
             </div>
+            <Modal isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} className="modal">
+                <div className="modal-content">
+                    <h2>Preview File</h2>
+                    <div>
+                        {modalContent && modalFilePath.endsWith('.txt') && (
+                            <pre>{String.fromCharCode.apply(null, Array.from(new Uint16Array(modalContent as ArrayBuffer)))}</pre>
+                        )}
+                        {modalContent && modalFilePath.match(/\.(jpg|jpeg|png|gif)$/) && (
+                            <img src={modalContent as string} alt="Preview" />
+                        )}
+                    </div>
+                    <button
+                        onClick={() => {
+                            const a = document.createElement('a');
+                            a.href = modalContent as string;
+                            a.download = modalFilePath.split('/').pop() || 'file';
+                            a.style.display = 'none';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            setIsModalOpen(false);
+                        }}
+                    >
+                        Download
+                    </button>
+                    <button onClick={() => setIsModalOpen(false)}>Close</button>
+                </div>
+            </Modal>
         </div>
     );
 };
