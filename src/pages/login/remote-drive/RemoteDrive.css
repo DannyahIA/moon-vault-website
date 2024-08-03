@@ -1,0 +1,223 @@
+/* RemoteDrive.css */
+
+.remote-drive-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.header {
+    background-color: #f1f3f4;
+    padding: 10px 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.remote-drive {
+    display: flex;
+    flex: 1;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar li {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar li:hover {
+    background-color: #e0e0e0;
+}
+
+.sidebar li.active {
+    background-color: #d0d0d0;
+    font-weight: bold;
+}
+
+.sidebar input[type="text"] {
+    width: calc(100% - 40px);
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.sidebar input[type="text"]::placeholder {
+    color: #aaa;
+}
+
+.sidebar button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    background-color: #1a73e8;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar button:hover {
+    background-color: #1669c1;
+}
+
+.sidebar .search-container .search-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.main {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.main h2 {
+    display: inline-block;
+}
+
+.upload-btn-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    vertical-align: bottom;
+    align-items: center;
+}
+
+.upload-btn {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.upload-btn:hover {
+    background-color: #0056b3;
+}
+
+.upload-btn input[type="file"] {
+    display: none;
+}
+
+.upload-btn::before {
+    content: '📤 Upload';
+    font-size: 16px;
+}
+
+.main input[type="file"] {
+    margin-bottom: 20px;
+}
+
+.main ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.main li {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    transition: background-color 0.3s ease;
+}
+
+.main li:hover {
+    background-color: #f5f5f5;
+}
+
+.file-icon {
+    margin-right: 10px;
+}
+
+.file-name {
+    flex: 1;
+}
+
+.file-icon {
+    font-size: 1.5em;
+    margin-right: 8px;
+}
+
+.context-menu {
+    position: absolute;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: 10px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+}
+
+.context-menu button {
+    background: none;
+    border: none;
+    padding: 10px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.context-menu button:hover {
+    background-color: #f1f1f1;
+}
+
+.main button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border: none;
+    background-color: #e53935;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.main button:hover {
+    background-color: #d32f2f;
+}
+
+.main input[type="text"] {
+    padding: 5px;
+    margin-left: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li.active {
+    background-color: #007bff;
+    color: white;
+}
+
+li:hover {
+    cursor: pointer;
+}

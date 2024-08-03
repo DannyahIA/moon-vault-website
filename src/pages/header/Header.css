@@ -1,0 +1,27 @@
+/* Header.css */
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background-color: #f2f2f2;
+}
+
+.logo {
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.website-name {
+    margin-left:8px;
+}
+
+.links {
+    display: flex;
+    gap: 16px;
+}
+
+.account-icon {
+    font-size: 24px;
+}
