@@ -13,7 +13,7 @@ interface Folder {
 }
 
 const RemoteDrive: React.FC = () => {
-    const Host = 'http://192.168.100.2:8080';
+    const Host = 'http://remote-lunar.ddns.net:8080';
     const [folders, setFolders] = useState<Folder[]>([]);
     const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
     const [files, setFiles] = useState<Folder[]>([]);
@@ -211,25 +211,33 @@ const RemoteDrive: React.FC = () => {
             case '.pdf':
                 return '📄'; // PDF
             case '.doc':
+                return '📝'; // Documento Word
             case '.docx':
                 return '📝'; // Documento Word
             case '.xls':
+                return '📊'; // Planilha Excel
             case '.xlsx':
                 return '📊'; // Planilha Excel
             case '.ppt':
+                return '📈'; // Apresentação PowerPoint
             case '.pptx':
                 return '📈'; // Apresentação PowerPoint
             case '.jpg':
+                return '🖼️'; // Imagem
             case '.jpeg':
+                return '🖼️'; // Imagem
             case '.png':
+                return '🖼️'; // Imagem
             case '.gif':
                 return '🖼️'; // Imagem
             case '.mp4':
+                return '🎥'; // Vídeo
             case '.avi':
                 return '🎥'; // Vídeo
             case '.mp3':
                 return '🎵'; // Áudio
             case '.zip':
+                return '📦'; // Arquivo compactado
             case '.rar':
                 return '📦'; // Arquivo compactado
             default:

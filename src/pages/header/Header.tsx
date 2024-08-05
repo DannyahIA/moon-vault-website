@@ -8,8 +8,7 @@ const Header: React.FC = () => {
     return (
         <header>
             <div className="logo">Logo</div>
-            <div className="website-name">Website Name</div>
-            <div className="search-bar">Search Bar</div>
+            <div className="website-name">Personal Website</div>
             <div className="links">
                 <div className="home"><Link to="/">Home</Link></div>
                 {isAuthenticated && (

@@ -27,7 +27,7 @@ const Login: React.FC = () => {
         setError('');
 
         try {
-            const response = await fetch('http://192.168.100.2:8080/login', {
+            const response = await fetch('http://remote-lunar.ddns.net:8080/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
