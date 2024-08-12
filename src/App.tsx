@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
 
 import Login from './pages/login/Login';
-import MainPage from './pages/main_page/MainPage';
+import MainPage from './pages/main-page/MainPage';
 import Header from './pages/header/Header';
 import RemoteDrive from './pages/remote-drive/RemoteDrive';
 import About from './pages/about/About';
