@@ -1,193 +1,101 @@
 import React, { useState, useEffect } from 'react';
-import { FaDownload, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaDownload, FaTrash, FaTimes } from 'react-icons/fa';
 import Modal from 'react-modal';
 import './RemoteDrive.css';
-
-interface Folder {
-    name: string;
-    is_folder: boolean;
-    path: string;
-    size: string;
-    extension: string;
-    data_modified: string;
-}
+import { Folder } from './types';
+import { fetchFolders, fetchFiles, searchFiles, createFolder, deleteFile, uploadFile, renameFile, downloadFile } from './api';
+import { getFileIcon } from './utils';
 
 const RemoteDrive: React.FC = () => {
-    const Host = 'http://192.168.100.2:8080';
     const [folders, setFolders] = useState<Folder[]>([]);
     const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
     const [files, setFiles] = useState<Folder[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [contextMenu, setContextMenu] = useState<{ x: number, y: number, file: Folder | null, location: 'sidebar' | 'main' } | null>(null);
+    const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState<string | ArrayBuffer | null>(null);
     const [modalFilePath, setModalFilePath] = useState('');
-    const [previousFolder, setPreviousFolder] = useState<Folder | null>(null); // Added state for previous folder
+    const [previousFolder, setPreviousFolder] = useState<Folder | null>(null);
 
     useEffect(() => {
         fetchFolders().then((data) => setFolders(data));
     }, []);
 
-    const fetchFolders = async (): Promise<Folder[]> => {
-        const response = await fetch(Host + '/file-manager/list-root-folders');
-        const data = await response.json();
-        return data;
-    };
-
-    const fetchFiles = async (path: string): Promise<Folder[]> => {
-        const response = await fetch(Host + '/file-manager/list-files', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ path }),
-        });
-        const data = await response.json();
-        return data;
-    };
-
-    const searchFiles = async (query: string): Promise<Folder[]> => {
-        const response = await fetch(Host + '/file-manager/search-files', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ query }),
-        });
-        const data = await response.json();
-        return data;
-    };
-
-    const createFolder = async (folderName: string, path: string) => {
-        await fetch(Host + `/file-manager/create-folder/${folderName}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ path }),
-        });
-        if (selectedFolder) {
-            handleFolderClick(selectedFolder);
-        } else {
-            fetchFolders().then((data) => setFolders(data));
-        }
-    };
-
-    const deleteFile = async (filePath: string) => {
-        await fetch(Host + '/file-manager/delete-file', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify([{ path: filePath }]),
-        });
-        if (selectedFolder) {
-            handleFolderClick(selectedFolder);
-        } else {
-            fetchFolders().then((data) => setFolders(data));
-        }
-    };
-
-    const uploadFile = async (file: File) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('path', selectedFolder?.path || '');
-
-        await fetch(Host + '/file-manager/upload-file', {
-            method: 'POST',
-            body: formData,
-        });
-
-        if (selectedFolder) {
-            handleFolderClick(selectedFolder);
-        }
-    };
-
-    const renameFile = async (filePath: string, newName: string, is_folder: boolean) => {
-        try {
-            const response = await fetch(Host + '/file-manager/rename-file', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ path: filePath, new_name: newName, is_folder: is_folder }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to rename file');
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (selectedFiles.size > 0) {
+                const target = event.target as HTMLElement;
+                if (!target.closest('.file-table')) {
+                    setSelectedFiles(new Set());
+                }
             }
+        };
 
-            if (selectedFolder) {
-                handleFolderClick(selectedFolder);
-            }
-        } catch (error) {
-            console.error('Error renaming file:', error);
-        }
-    };
-
-    const downloadFile = async (filePath: string) => {
-        try {
-            const response = await fetch(Host + '/file-manager/download-file', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ path: filePath }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to download file');
-            }
-
-            // Create a URL for the file
-            const blob = await response.blob();
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setModalContent(reader.result);
-                setModalFilePath(filePath);
-                setIsModalOpen(true);
-            };
-            reader.readAsDataURL(blob);
-        } catch (error) {
-            console.error('Error downloading file:', error);
-        }
-    };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [selectedFiles]);
 
     const handleFolderClick = async (folder: Folder) => {
         setSelectedFolder(folder);
-        setPreviousFolder(selectedFolder); // Store the previous folder
+        setPreviousFolder(selectedFolder);
         const files = await fetchFiles(folder.path);
         setFiles(files);
+    };
+
+    const handleItemClick = (file: Folder, event: React.MouseEvent) => {
+        event.preventDefault();
+        const isCtrl = event.ctrlKey;
+        const isShift = event.shiftKey;
+        const filePath = file.path;
+
+        if (isCtrl) {
+            setSelectedFiles((prev) => {
+                const newSelection = new Set(prev);
+                if (newSelection.has(filePath)) {
+                    newSelection.delete(filePath);
+                } else {
+                    newSelection.add(filePath);
+                }
+                return newSelection;
+            });
+        } else if (isShift && selectedFiles.size > 0) {
+            const paths = files.map((f) => f.path);
+            const lastSelected = Array.from(selectedFiles)[selectedFiles.size - 1];
+            const startIndex = paths.indexOf(lastSelected);
+            const endIndex = paths.indexOf(filePath);
+            const newSelection = new Set(selectedFiles);
+
+            for (let i = Math.min(startIndex, endIndex); i <= Math.max(startIndex, endIndex); i++) {
+                newSelection.add(paths[i]);
+            }
+            setSelectedFiles(newSelection);
+        } else {
+            setSelectedFiles(new Set([filePath]));
+        }
     };
 
     const handleItemDoubleClick = async (item: Folder) => {
         if (item.is_folder) {
             handleFolderClick(item);
         } else {
-            downloadFile(item.path);
+            const blob = await downloadFile(item.path, '', '', '');
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setModalContent(reader.result);
+                setModalFilePath(item.path);
+                setIsModalOpen(true);
+            };
+            reader.readAsDataURL(blob);
         }
-    };
-
-    const handleContextMenu = (event: React.MouseEvent, file: Folder | null, location: 'sidebar' | 'main') => {
-        event.preventDefault();
-        setContextMenu({ x: event.clientX, y: event.clientY, file, location });
-    };
-
-    const handleCloseContextMenu = () => {
-        setContextMenu(null);
     };
 
     const handleRename = (newName: string) => {
-        if (contextMenu?.file) {
-            renameFile(contextMenu.file.path, newName, contextMenu.file.is_folder);
-            handleCloseContextMenu();
-        }
-    };
-
-    const handleDownload = () => {
-        if (contextMenu?.file) {
-            downloadFile(contextMenu.file.path);
-            handleCloseContextMenu();
+        if (selectedFiles.size > 0) {
+            selectedFiles.forEach((filePath) => {
+                renameFile(filePath, newName, false);
+            });
         }
     };
 
@@ -205,41 +113,36 @@ const RemoteDrive: React.FC = () => {
         }
     };
 
-    const getFileIcon = (is_folder: boolean, extension: string): string => {
-        if (is_folder) return '📁'; // Ícone de pasta
-        switch (extension) {
-            case '.pdf':
-                return '📄'; // PDF
-            case '.doc':
-            case '.docx':
-                return '📝'; // Documento Word
-            case '.xls':
-            case '.xlsx':
-                return '📊'; // Planilha Excel
-            case '.ppt':
-            case '.pptx':
-                return '📈'; // Apresentação PowerPoint
-            case '.jpg':
-            case '.jpeg':
-            case '.png':
-            case '.gif':
-                return '🖼️'; // Imagem
-            case '.mp4':
-            case '.avi':
-                return '🎥'; // Vídeo
-            case '.mp3':
-                return '🎵'; // Áudio
-            case '.zip':
-            case '.rar':
-                return '📦'; // Arquivo compactado
-            default:
-                return '📄'; // Arquivo genérico
-        }
-    };
-
     const handleBack = () => {
         if (previousFolder) {
             handleFolderClick(previousFolder);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (selectedFiles.size > 0) {
+            const deletionPromises = Array.from(selectedFiles).map((filePath) => deleteFile(filePath, ''));
+            await Promise.all(deletionPromises);
+            setSelectedFiles(new Set());
+            if (selectedFolder) {
+                handleFolderClick(selectedFolder);
+            } else {
+                fetchFolders().then((data) => setFolders(data));
+            }
+        }
+    };
+
+    const handleDownload = async () => {
+        if (selectedFiles.size > 0) {
+            const filePath = Array.from(selectedFiles)[0];
+            const blob = await downloadFile(filePath, '', '', '');
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setModalContent(reader.result);
+                setModalFilePath(filePath);
+                setIsModalOpen(true);
+            };
+            reader.readAsDataURL(blob);
         }
     };
 
@@ -249,7 +152,7 @@ const RemoteDrive: React.FC = () => {
                 {/* Seu conteúdo de cabeçalho existente */}
             </div>
             <div className="remote-drive">
-                <div className="sidebar" onContextMenu={(e) => handleContextMenu(e, null, 'sidebar')}>
+                <div className="sidebar">
                     <input
                         type="text"
                         placeholder="Search files..."
@@ -266,7 +169,6 @@ const RemoteDrive: React.FC = () => {
                             <li
                                 key={folder.path}
                                 onClick={() => handleFolderClick(folder)}
-                                onContextMenu={(e) => handleContextMenu(e, folder, 'sidebar')}
                                 className={selectedFolder?.path === folder.path ? 'active' : ''}
                             >
                                 {getFileIcon(folder.is_folder, '')} {folder.name}
@@ -284,7 +186,20 @@ const RemoteDrive: React.FC = () => {
                         }}
                     />
                 </div>
-                <div className="main" onContextMenu={(e) => handleContextMenu(e, null, 'main')}>
+                <div className="main">
+                    <div className="status-bar">
+                        {selectedFiles.size > 0 && (
+                            <div>
+                                <span>{selectedFiles.size} arquivo(s) selecionado(s)</span>
+                                <button onClick={handleDelete} disabled={selectedFiles.size === 0}>
+                                    <FaTrash /> Excluir
+                                </button>
+                                <button onClick={handleDownload} disabled={selectedFiles.size === 0}>
+                                    <FaDownload /> Baixar
+                                </button>
+                            </div>
+                        )}
+                    </div>
                     {selectedFolder && (
                         <div>
                             <h2>
@@ -301,72 +216,87 @@ const RemoteDrive: React.FC = () => {
                                             onChange={(e) => {
                                                 const file = e.target.files?.[0];
                                                 if (file) {
-                                                    uploadFile(file);
+                                                    uploadFile(file, selectedFolder.path);
                                                 }
                                             }}
                                         />
                                     </label>
                                 </div>
                             )}
-                            <ul className="file-list">
-                                {files.map((file) => (
-                                    <li key={file.path} onDoubleClick={() => handleItemDoubleClick(file)} className="file-item">
-                                        <div className="file-info">
-                                            <span className="file-icon">{getFileIcon(file.is_folder, file.extension)} {file.name}</span>
-                                            <span className="file-size">{file.is_folder ? '' : `${file.size}`}</span>
-                                            <span className="file-date">{file.data_modified}</span>
-                                        </div>
-                                        <div className="file-actions">
-                                            <FaDownload onClick={() => downloadFile(file.path)} title="Download" />
-                                            <FaEdit onClick={() => handleRename(prompt('New name') || '')} title="Edit" />
-                                            <FaTrash onClick={() => deleteFile(file.path)} title="Delete" />
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
+                            <table className="file-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Size</th>
+                                        <th>Date Modified</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {files.map((file) => (
+                                        <tr
+                                            key={file.path}
+                                            onClick={(e) => handleItemClick(file, e)}
+                                            onDoubleClick={() => handleItemDoubleClick(file)}
+                                            className={selectedFiles.has(file.path) ? 'selected' : ''}
+                                        >
+                                            <td>
+                                                {getFileIcon(file.is_folder, file.extension)} {file.name}
+                                            </td>
+                                            <td>{file.is_folder ? 'Folder' : file.extension}</td>
+                                            <td>{file.is_folder ? '' : file.size}</td>
+                                            <td>{file.is_folder ? '' : file.data_modified}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                 </div>
-                {contextMenu && (
-                    <div
-                        className="context-menu"
-                        style={{ top: contextMenu.y, left: contextMenu.x }}
-                        onClick={handleCloseContextMenu}
-                    >
-                        <button onClick={() => handleRename(prompt('New name') || '')}>Rename</button>
-                        <button onClick={handleDownload}>Download</button>
-                        <button onClick={() => deleteFile(contextMenu.file?.path || '')}>Delete</button>
-                    </div>
-                )}
             </div>
-            <Modal isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} className="modal">
+            <Modal
+                isOpen={isModalOpen}
+                onRequestClose={() => setIsModalOpen(false)}
+                className="modal"
+                overlayClassName="overlay"
+                ariaHideApp={false} // Para evitar warnings no console
+            >
+                <div className="modal-header">
+                    <h2>Visualização do Arquivo</h2>
+                    <button className="close-button" onClick={() => setIsModalOpen(false)}>✖</button>
+                </div>
                 <div className="modal-content">
-                    <h2>Preview File</h2>
-                    <div>
-                        {modalContent && modalFilePath.endsWith('.txt') && (
-                            <pre>{String.fromCharCode.apply(null, Array.from(new Uint16Array(modalContent as ArrayBuffer)))}</pre>
-                        )}
-                        {modalContent && modalFilePath.match(/\.(jpg|jpeg|png|gif)$/) && (
-                            <img src={modalContent as string} alt="Preview" />
-                        )}
-                    </div>
-                    <button
-                        onClick={() => {
-                            const a = document.createElement('a');
-                            a.href = modalContent as string;
-                            a.download = modalFilePath.split('/').pop() || 'file';
-                            a.style.display = 'none';
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            setIsModalOpen(false);
-                        }}
-                    >
-                        Download
-                    </button>
-                    <button onClick={() => setIsModalOpen(false)}>Close</button>
+                    {modalContent && (
+                        <>
+                            {modalFilePath.endsWith('.pdf') && (
+                                <iframe
+                                    src={modalContent as string}
+                                    style={{ width: '100%', height: '500px', border: 'none' }}
+                                    title="Preview"
+                                />
+                            )}
+                            {modalFilePath.endsWith('.docx') && (
+                                <iframe
+                                    src={modalContent as string}
+                                    style={{ width: '100%', height: '500px', border: 'none' }}
+                                    title="Preview"
+                                />
+                            )}
+                            {modalFilePath.endsWith('.jpg') || modalFilePath.endsWith('.jpeg') || modalFilePath.endsWith('.gif') || modalFilePath.endsWith('.png') ? (
+                                <img
+                                    src={modalContent as string}
+                                    alt="Preview"
+                                    style={{ width: '100%', height: 'auto' }}
+                                />
+                            ) : (
+                                <p>Pré-visualização não disponível para este tipo de arquivo.</p>
+                            )}
+                            <button className="download-button" onClick={() => {/* lógica para download */ }}>Baixar</button>
+                        </>
+                    )}
                 </div>
             </Modal>
+
         </div>
     );
 };

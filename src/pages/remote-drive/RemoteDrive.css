@@ -4,12 +4,15 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
+    font-family: 'Roboto', sans-serif;
 }
 
 .header {
-    background-color: #f1f3f4;
-    padding: 10px 20px;
+    background-color: #f8f9fa;
+    padding: 16px;
     border-bottom: 1px solid #e0e0e0;
+    font-size: 24px;
+    font-weight: bold;
 }
 
 .remote-drive {
@@ -20,9 +23,17 @@
 .sidebar {
     width: 250px;
     background-color: #ffffff;
+    padding: 16px;
     border-right: 1px solid #e0e0e0;
-    padding: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-size: 14px;
 }
 
 .sidebar ul {
@@ -32,304 +43,193 @@
 }
 
 .sidebar li {
-    padding: 10px;
     cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
+    padding: 10px;
+    margin-bottom: 5px;
+    transition: background-color 0.2s;
 }
 
 .sidebar li:hover {
-    background-color: #e0e0e0;
+    background-color: #f1f1f1;
 }
 
 .sidebar li.active {
-    background-color: #d0d0d0;
-    font-weight: bold;
-}
-
-.sidebar input[type="text"] {
-    width: calc(100% - 40px);
-    padding: 10px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    position: relative;
-    margin-bottom: 10px;
-}
-
-.sidebar input[type="text"]::placeholder {
-    color: #aaa;
-}
-
-.sidebar button {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border: none;
-    background-color: #1a73e8;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.sidebar button:hover {
-    background-color: #1669c1;
-}
-
-.sidebar .search-container .search-icon {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
+    background-color: #e0e0e0;
 }
 
 .main {
     flex: 1;
-    padding: 20px;
-    overflow-y: auto;
+    padding: 16px;
+    background-color: #f8f9fa;
 }
 
-.main h2 {
-    display: inline-block;
-}
-
-.upload-btn-wrapper {
+.status-bar {
+    position: sticky;
+    top: 0;
     display: flex;
-    justify-content: flex-end;
-    vertical-align: bottom;
     align-items: center;
-}
-
-.upload-btn {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-}
-
-.upload-btn:hover {
-    background-color: #0056b3;
-}
-
-.upload-btn input[type="file"] {
-    display: none;
-}
-
-.upload-btn::before {
-    content: '📤 Upload';
-    font-size: 16px;
-}
-
-.main input[type="file"] {
+    justify-content: space-between;
     margin-bottom: 20px;
 }
 
-.main ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.main li {
+.status-bar div {
+    position: sticky;
     display: flex;
     align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #e0e0e0;
-    transition: background-color 0.3s ease;
 }
 
-.main li:hover {
-    background-color: #f5f5f5;
+.status-bar span {
+    position: sticky;
+    margin-right: 10px;
+    font-size: 14px;
 }
 
-.file-list {
-    list-style: none;
-    padding: 0;
-}
-
-.file-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    transition: background-color 0.3s;
-}
-
-.file-item:hover {
-    background-color: #f0f0f0;
-}
-
-.file-info {
-    display: flex;
-    justify-content: space-between;
-    width: 70%;
-}
-
-.file-actions {
-    display: flex;
-    gap: 10px; /* Espaço entre os ícones */
-}
-
-.file-icon {
-    margin-right: 10px; /* Espaço entre o ícone do arquivo e o nome */
-}
-
-.context-menu {
-    position: absolute;
-    background-color: #ffffff;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    padding: 10px;
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-}
-
-.context-menu button {
-    background: none;
+.status-bar button {
+    position: sticky;
+    margin-right: 10px;
+    padding: 8px 12px;
     border: none;
-    padding: 10px;
-    text-align: left;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #ffffff;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    font-size: 14px;
+    transition: background-color 0.2s;
 }
 
-.context-menu button:hover {
+.status-bar button:hover {
+    position: sticky;
+    background-color: #0056b3;
+}
+
+.file-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.file-table th,
+.file-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+}
+
+.file-table th {
+    text-align: left;
+    font-weight: bold;
     background-color: #f1f1f1;
 }
 
-.main button {
-    margin-left: 10px;
-    padding: 5px 10px;
-    border: none;
-    background-color: #e53935;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+.file-table tr:hover {
+    background-color: #f9f9f9;
 }
 
-.main button:hover {
-    background-color: #d32f2f;
-}
-
-.main input[type="text"] {
-    padding: 5px;
-    margin-left: 10px;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-li.active {
-    background-color: #007bff;
-    color: white;
-}
-
-li:hover {
-    cursor: pointer;
-}
-.modal {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.5);
-    z-index: 1000;
-}
-
-.modal-content {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.modal h2 {
-    margin-bottom: 10px;
-}
-
-.modal img {
-    max-width: 100%;
-    max-height: 400px;
-    object-fit: contain;
-    margin-bottom: 10px;
-}
-
-.modal button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    border: none;
-    background-color: #007bff;
-    color: #fff;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.modal button:hover {
-    background-color: #0056b3;
-}
-
-.modal-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 400px;
-    height: 400px;
-    border: 1px solid #e0e0e0;
-}
-
-.modal-image {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-}
-
-.modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
+.file-table tr.selected {
+    background-color: #e0e0e0;
 }
 
 .back-button {
-    display: inline-block;
-    padding: 10px;
-    background-color: #007bff;
-    color: #fff;
+    margin-right: 10px;
+    padding: 5px 10px;
     border: none;
-    border-radius: 5px;
+    background-color: #f1f1f1;
     cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
-.back-button:hover {
-    background-color: #0056b3;
+.upload-btn-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    margin-bottom: 20px;
 }
 
-.back-button::before {
-    content: '\2190'; /* Unicode character for left arrow */
-    margin-right: 5px;
+.upload-btn {
+    border: 1px solid #007bff;
+    background-color: #ffffff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.upload-btn:hover {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.upload-btn input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Estilos do overlay */
+.overlay {
+    position: fixed; /* Fixar na tela */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7); /* Fundo escuro e transparente */
+    z-index: 999; /* Colocar abaixo do modal */
+}
+
+/* Estilos do modal */
+.modal {
+    position: fixed; /* Fixar na tela */
+    top: 18%; /* 50% do topo */
+    right: 65%;
+    max-width: 800px; /* Largura máxima */
+    width: 60%; /* Largura padrão */
+    background: white; /* Fundo branco */
+    border-radius: 8px; /* Bordas arredondadas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra do modal */
+    z-index: 1000; /* Colocar acima de outros elementos */
+    padding: 20px; /* Espaçamento interno */
+}
+
+/* Estilo do cabeçalho do modal */
+.modal-header {
+    display: flex;
+    justify-content: space-between; /* Espaço entre título e botão de fechar */
+    align-items: center; /* Alinhamento vertical */
+}
+
+/* Botão de fechar */
+.close-button {
+    background: transparent; /* Fundo transparente */
+    border: none; /* Sem borda */
+    cursor: pointer; /* Mão ao passar o mouse */
+    font-size: 24px; /* Tamanho da fonte */
+}
+
+/* Estilos do conteúdo do modal */
+.modal-content {
+    position: relative; /* Posição relativa */
+    margin-top: 20px; /* Espaço acima do conteúdo */
+    text-align: center; /* Centralizar texto */
+}
+
+/* Botão de download */
+.download-button {
+    background: #007bff; /* Cor de fundo */
+    color: white; /* Cor do texto */
+    border: none; /* Sem borda */
+    padding: 10px 15px; /* Espaçamento interno */
+    border-radius: 5px; /* Bordas arredondadas */
+    cursor: pointer; /* Mão ao passar o mouse */
+    margin-top: 10px; /* Margem acima */
+    transition: background-color 0.2s;
+}
+
+.download-button:hover {
+    background-color: #0056b3; /* Cor do botão ao passar o mouse */
 }
