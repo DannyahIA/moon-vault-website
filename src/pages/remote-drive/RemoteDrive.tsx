@@ -148,9 +148,6 @@ const RemoteDrive: React.FC = () => {
 
     return (
         <div className="remote-drive-wrapper">
-            <div className="header">
-                {/* Seu conteúdo de cabeçalho existente */}
-            </div>
             <div className="remote-drive">
                 <div className="sidebar">
                     <input
@@ -187,7 +184,7 @@ const RemoteDrive: React.FC = () => {
                     />
                 </div>
                 <div className="main">
-                    <div className="status-bar">
+                    <div className="status-bar" style={{ visibility: selectedFiles.size > 0 ? 'visible' : 'hidden' }}>
                         {selectedFiles.size > 0 && (
                             <div>
                                 <span>{selectedFiles.size} arquivo(s) selecionado(s)</span>
@@ -211,6 +208,7 @@ const RemoteDrive: React.FC = () => {
                             {!searchQuery && (
                                 <div className="upload-btn-wrapper">
                                     <label className="upload-btn">
+                                        Upload File
                                         <input
                                             type="file"
                                             onChange={(e) => {
@@ -296,7 +294,6 @@ const RemoteDrive: React.FC = () => {
                     )}
                 </div>
             </Modal>
-
         </div>
     );
 };

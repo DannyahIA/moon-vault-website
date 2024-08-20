@@ -1,6 +1,7 @@
 import { Folder } from './types';
 
-const Host = 'http://remote-lunar.ddns.net:8080';
+// const Host = 'http://remote-lunar.ddns.net:8080';
+const Host = 'http://localhost:8080';
 
 export const fetchFolders = async (): Promise<Folder[]> => {
     const response = await fetch(Host + '/file-manager/list-root-folders');
